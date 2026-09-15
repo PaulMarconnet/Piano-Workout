@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Piano Workout</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div style="display: flex; align-items: center;">
+            <svg viewBox="0 0 256 256" style="width: 28px; height: 28px; fill: var(--text-primary); margin-right: 12px;">
+                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,48h24v88H80Zm32,104a8,8,0,0,0,8-8V48h16v96a8,8,0,0,0,8,8h8v56H104V152Zm40-16V48h24v88ZM48,48H64v96a8,8,0,0,0,8,8H88v56H48ZM208,208H168V152h16a8,8,0,0,0,8-8V48h16V208Z"></path>
+            </svg>
+            <h1 class="app-title">Piano Workout</h1>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button id="btn-nav-retour" class="btn-action btn-ghost-neutral btn-square" onclick="afficherVue('pratique')" style="display: none;" title="Retour à la séance">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button id="btn-nav-historique" class="btn-action btn-ghost-neutral" onclick="afficherVue('historique')">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg> Historique
+            </button>
+            <button id="btn-nav-biblio" class="btn-action btn-ghost-neutral" onclick="afficherVue('bibliotheque')">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg> Bibliothèque
+            </button>
+            <button id="btn-nav-nouvelle" class="btn-action btn-ghost-green" onclick="afficherVue('creation')">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Nouvelle séance
+            </button>
+        </div>
+    </div>
+
+    <!-- VUE PRATIQUE -->
+    <div id="vue-pratique" class="vue-active">
+        <div style="position: relative; margin-bottom: 32px;">
+            <div style="position: absolute; left: 0; top: 0; display: flex; gap: 8px;">
+                <button id="btn-pause-cafe" class="btn-action btn-ghost-blue btn-square" style="display: none; transition: all 0.2s;" onclick="demarrerPauseCafe()" title="Petite pause ?">
+                    <svg viewBox="0 0 256 256" style="width: 18px; height: 18px; fill: currentColor; margin: 0;">
+                        <path d="M80,56V24a8,8,0,0,1,16,0V56a8,8,0,0,1-16,0Zm40,8a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,120,64Zm32,0a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,152,64Zm96,56v8a40,40,0,0,1-37.51,39.91,96.59,96.59,0,0,1-27,40.09H208a8,8,0,0,1,0,16H32a8,8,0,0,1,0-16H56.54A96.3,96.3,0,0,1,24,136V88a8,8,0,0,1,8-8H208A40,40,0,0,1,248,120ZM200,96H40v40a80.27,80.27,0,0,0,45.12,72h69.76A80.27,80.27,0,0,0,200,136Zm32,24a24,24,0,0,0-16-22.62V136a95.78,95.78,0,0,1-1.2,15A24,24,0,0,0,232,128Z"></path>
+                    </svg> 
+                    <span id="texte-pause-cafe" style="display: none; font-variant-numeric: tabular-nums; margin-left: 6px;"></span>
+                </button>
+            </div>
+
+            <div style="position: absolute; right: 0; top: 0; display: flex; gap: 8px;">
+                <button id="btn-pause-global" class="btn-action btn-ghost-neutral btn-square" disabled onclick="togglePause()" title="Pause/Reprendre">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+            </div>
+            <h2 id="titre-date" class="titre-seance">Chargement...</h2>
+            <div id="tonalite" class="tonalite-display" style="margin-bottom: 0;"></div>
+        </div>
+        <div id="conteneur-items"></div>
+        <div id="fin-seance-container" class="action-container" style="display: none; margin-top: 32px; margin-bottom: 32px; flex-direction: column; align-items: center;">
+            <button id="btn-terminer" class="btn-action btn-ghost-neutral" onclick="demanderFinSeance()" style="padding: 10px 24px; font-size: 16px;">
+                <svg viewBox="0 0 16 16" style="width: 16px; height: 16px; fill: currentColor; margin-right: 8px;"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg> Terminer la séance
+            </button>
+            <div id="fin-seance-actions" style="display: none; gap: 16px;">
+                <button class="btn-action btn-ghost-green" onclick="sauvegarderStats()" style="padding: 10px 24px; font-size: 16px;">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Sauvegarder
+                </button>
+                <button class="btn-action btn-ghost-red btn-square" onclick="ignorerStats()" title="Ne pas sauvegarder les stats">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE CRÉATION -->
+    <div id="vue-creation" style="display: none;">
+        <div class="header-creation">
+            <h2>Préparer la séance</h2>
+        </div>
+
+        <div class="form-section">
+            <h3>Tonalité principale</h3>
+            <div class="form-row">
+                <div style="flex:1; min-width:80px;">
+                    <select id="input-ton-note">
+                        <option value="C">C</option><option value="C#">C#</option><option value="D♭">D♭</option><option value="D">D</option><option value="E♭">E♭</option><option value="E">E</option><option value="F">F</option><option value="F#">F#</option><option value="G♭">G♭</option><option value="G">G</option><option value="G#">G#</option><option value="A♭">A♭</option><option value="A">A</option><option value="B♭">B♭</option><option value="B">B</option>
+                    </select>
+                </div>
+                <div style="flex:1; min-width:100px;">
+                    <select id="input-ton-mode">
+                        <option value="majeur">majeur</option><option value="mineur">mineur</option>
+                    </select>
+                </div>
+                <div class="tonalite-tools">
+                    <button class="btn-tool" onclick="genererTonaliteAleatoire()" title="Aléatoire">
+                        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Ajouter un exercice</h3>
+            <div class="form-row">
+                <div style="flex:2; min-width:180px;">
+                    <label>Catégorie</label>
+                    <select id="input-categorie" onchange="gererAffichageOptions()">
+                        <option value="Voicings">Voicings</option>
+                        <option value="Patterns">Patterns</option>
+                        <option value="Licks">Licks</option>
+                        <option value="Standards">Standards</option>
+                        <option value="Thèmes">Thèmes</option>
+                        <option value="Relevé">Relevé</option>
+                        <option value="Technique">Technique</option>
+                        <option value="Gammes">Gammes</option>
+                        <option value="Projets">Projets</option>
+                        <option value="Autre...">Autre...</option>
+                    </select>
+                </div>
+                <div style="flex:2; min-width:180px;" id="container-autre">
+                    <label>Nom catégorie</label>
+                    <input type="text" id="input-categorie-autre" placeholder="Ex: Déchiffrage">
+                </div>
+                <div style="flex:none;">
+                    <label>Temps (min)</label>
+                    <div class="time-spinner">
+                        <button type="button" onclick="changerTemps(-5)">-</button><input type="number" id="input-temps" value="25" min="1"><button type="button" onclick="changerTemps(5)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex:1;">
+                    <label>Contenu précis</label>
+                    <input type="text" id="input-contenu" placeholder="Ex : II - V - I majeurs dans les 12 tons, Relevé Moment's Notice premier chorus, ...">
+                </div>
+            </div>
+            <div class="form-row">
+                <div style="flex:none;">
+                    <label>Tempo (bpm)</label>
+                    <div class="time-spinner">
+                        <button type="button" onclick="changerTempo(-5)">-</button><input type="number" id="input-tempo" placeholder="—" min="20"><button type="button" onclick="changerTempo(5)">+</button>
+                    </div>
+                </div>
+                <div style="flex:3; min-width:200px;">
+                    <label>Lien (YouTube, Drive, ...)</label>
+                    <input type="url" id="input-lien" placeholder="https://...">
+                </div>
+            </div>
+
+            <div id="options-gammes" class="form-row">
+                <div style="flex:1; min-width:150px;">
+                    <label>Type de gamme</label>
+                    <select id="input-type-gamme">
+                        <option value="Majeure">Majeure</option><option value="Mineure mélodique">Mineure mélodique</option><option value="Mineure harmonique">Mineure harmonique</option><option value="Dorien">Dorien</option><option value="Altérée">Altérée</option><option value="Diminuée">Diminuée</option><option value="Diminuée inversée">Diminuée inversée</option><option value="Chromatique">Chromatique</option><option value="Par tons">Par tons</option><option value="Pentatonique">Pentatonique</option>
+                    </select>
+                </div>
+                <div style="flex:1; min-width:150px;">
+                    <label>Mains</label>
+                    <select id="input-mains">
+                        <option value="Mains ensemble">Mains ensemble</option><option value="Main droite">Main droite</option><option value="Main gauche">Main gauche</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="action-container">
+                <button id="btn-add-draft" class="btn-action btn-ghost-green" onclick="ajouterItemBrouillon()">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Ajouter à la séance
+                </button>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span>Séance</span>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="btn-import-routine" class="btn-action btn-ghost-blue btn-square" onclick="ouvrirModalRoutines()" title="Importer une routine">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    </button>
+                    <button id="btn-save-routine" class="btn-action btn-ghost-neutral btn-square" onclick="ouvrirModalSaveRoutine()" title="Enregistrer ce brouillon comme routine" disabled>
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                    </button>
+                    <span id="total-time-badge" class="badge" style="font-size: 13px; font-weight: 600;">0h00</span>
+                </div>
+            </h3>
+            <div id="liste-brouillon"></div>
+            <div class="action-container">
+                <button class="btn-action btn-ghost-blue" id="btn-save-seance" onclick="sauvegarderSeance()">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> Enregistrer la séance
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE BIBLIOTHÈQUE -->
+    <div id="vue-bibliotheque" style="display: none;">
+        <div class="header-creation">
+            <h2>Bibliothèque musicale</h2>
+        </div>
+        
+        <div class="form-section">
+            <h3>Ajouter à la bibliothèque</h3>
+            <form id="form-vocabulaire" onsubmit="ajouterVocabulaire(event)">
+                <div class="form-row">
+                    <div style="flex:2; min-width: 180px;">
+                        <label>Nom de l'élément</label>
+                        <input type="text" id="input-vocab-nom" placeholder="ex : Nardis, Lick Kenny Barron #1, ..." required>
+                    </div>
+                    <div style="flex:1; min-width: 120px;">
+                        <label>Catégorie</label>
+                        <select id="input-vocab-type" onchange="gererSousCategoriesForm()">
+                            <option value="Licks">Licks</option>
+                            <option value="Patterns">Patterns</option>
+                            <option value="Thèmes">Thèmes</option>
+                            <option value="Standards">Standards</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width: 150px; display: none;" id="container-vocab-sous-cat">
+                        <label>Sous-catégorie</label>
+                        <select id="input-vocab-sous-type"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div style="flex:1;">
+                        <label>Partition associée (Image ou PDF - Optionnel)</label>
+                        <input type="file" id="input-vocab-image" accept=".png, .jpeg, .jpg, .pdf" class="file-input">
+                    </div>
+                </div>
+                <div class="action-container" id="container-btn-vocab">
+                    <button type="submit" class="btn-action btn-ghost-green" id="btn-submit-vocab">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Ajouter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="form-section">
+            <h3 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                Ma bibliothèque
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; position: absolute; left: 10px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="search-biblio" placeholder="Rechercher..." oninput="rechercherBiblio(this.value)" style="padding-left: 32px; height: 32px; width: 160px; margin: 0;">
+                    </div>
+
+                    <button id="btn-filter-fav-biblio" class="btn-action btn-ghost-neutral btn-square" onclick="toggleFilterFav('biblio')" title="Afficher uniquement les favoris">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    </button>
+
+                    <div class="dropdown" id="dd-filter-biblio">
+                        <button onclick="toggleDropdown('dd-filter-biblio', event)" class="btn-action btn-ghost-neutral" style="height: 32px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <span id="label-filter-biblio">Toutes les catégories</span>
+                        </button>
+                        <div class="dropdown-content" style="right: auto; left: 0;">
+                            <button onclick="setFilter('biblio', 'Toutes', 'Toutes les catégories')" id="filter-biblio-Toutes" class="active">Toutes les catégories</button>
+                            <button onclick="setFilter('biblio', 'Licks', 'Licks')" id="filter-biblio-Licks">Licks</button>
+                            <button onclick="setFilter('biblio', 'Patterns', 'Patterns')" id="filter-biblio-Patterns">Patterns</button>
+                            <button onclick="setFilter('biblio', 'Thèmes', 'Thèmes')" id="filter-biblio-Thèmes">Thèmes</button>
+                            <button onclick="setFilter('biblio', 'Standards', 'Standards')" id="filter-biblio-Standards">Standards</button>
+                        </div>
+                    </div>
+
+                    <div class="dropdown" id="dd-biblio">
+                        <button onclick="toggleDropdown('dd-biblio', event)" class="btn-action btn-ghost-neutral" style="height: 32px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><line x1="4" x2="20" y1="6" y2="6"/><line x1="14" x2="20" y1="12" y2="12"/><line x1="8" x2="20" y1="18" y2="18"/></svg> Tri
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="setSort('biblio', 'nom_asc')" id="sort-biblio-nom_asc" class="active">Nom (A-Z)</button>
+                            <button onclick="setSort('biblio', 'nom_desc')" id="sort-biblio-nom_desc">Nom (Z-A)</button>
+                            <button onclick="setSort('biblio', 'prat_desc')" id="sort-biblio-prat_desc">Plus pratiqués d'abord</button>
+                            <button onclick="setSort('biblio', 'prat_asc')" id="sort-biblio-prat_asc">Moins pratiqués d'abord</button>
+                        </div>
+                    </div>
+                </div>
+            </h3>
+            <div id="liste-vocabulaire">
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">Chargement du vocabulaire...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE HISTORIQUE -->
+    <div id="vue-historique" style="display: none;">
+        <div class="header-creation" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <h2>Tableau de bord</h2>
+            <button class="btn-action btn-ghost-red" onclick="reinitialiserHistorique()" style="font-size: 13px;">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Réinitialiser
+            </button>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+            <div class="stat-card clickable" onclick="ouvrirModalGraph('temps', event)" title="Voir l'évolution du temps passé">
+                <div class="stat-title">Temps cette semaine</div>
+                <div class="stat-value" id="stat-temps-7j">-- min</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Complétion moyenne</div>
+                <div class="stat-value" id="stat-completion">-- %</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Série actuelle</div>
+                <div class="stat-value" id="stat-streak" style="color: var(--accent-red); display: flex; justify-content: center; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                    <span>--</span>
+                </div>
+            </div>
+            <div class="stat-card clickable" onclick="ouvrirModalGraph('tonalites', event)" title="Voir la répartition des tonalités">
+                <div class="stat-title">Meilleure tonalité</div>
+                <div class="stat-value" id="stat-tonalite-reine" style="color: var(--accent-yellow); display: flex; justify-content: center; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
+                    <span>--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 style="display: flex; justify-content: space-between; align-items: center; border: none; padding: 0; margin-bottom: 16px;">
+                <span>Dernières séances</span>
+                <div class="dropdown" id="dd-limite-historique">
+                    <button onclick="toggleDropdown('dd-limite-historique', event)" class="btn-action btn-ghost-neutral" style="height: 32px; padding: 0 10px; font-size: 13px;">
+                        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        <span id="label-limite-historique">10 dernières</span>
+                    </button>
+                    <div class="dropdown-content">
+                        <button onclick="changerLimiteHistorique(10, '10 dernières')" id="limite-hist-10" class="active">10 dernières</button>
+                        <button onclick="changerLimiteHistorique(20, '20 dernières')" id="limite-hist-20">20 dernières</button>
+                        <button onclick="changerLimiteHistorique(50, '50 dernières')" id="limite-hist-50">50 dernières</button>
+                        <button onclick="changerLimiteHistorique('toutes', 'Toutes')" id="limite-hist-toutes">Toutes</button>
+                    </div>
+                </div>
+            </h3>
+            <div id="liste-historique-seances">
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div id="modal-graph" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close-modal" onclick="fermerModal()">&times;</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; padding-right: 24px; flex-wrap: wrap; gap: 8px;">
+                <h3 id="titre-graph" style="margin: 0; color: var(--text-primary);">Titre</h3>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span id="total-temps-graph" class="badge-temps" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 10px; font-size: 13px;">--</span>
+                    
+                    <div class="dropdown" id="dd-type-graph" style="display: none;">
+                        <button onclick="toggleDropdown('dd-type-graph', event)" class="btn-action btn-ghost-neutral" style="height: 30px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+                            <span id="label-type-graph">Temps passé</span>
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="changerTypeGraph('temps')" id="filter-type-temps" class="active">Temps passé</button>
+                            <button onclick="changerTypeGraph('categories')" id="filter-type-categories">Répartition</button>
+                        </div>
+                    </div>
+
+                    <div class="dropdown" id="dd-periode-graph">
+                        <button onclick="toggleDropdown('dd-periode-graph', event)" class="btn-action btn-ghost-neutral" style="height: 30px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+                            <span id="label-periode-graph">Cette semaine</span>
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="changerPeriodeGraph('semaine')" id="filter-graph-semaine" class="active">Cette semaine</button>
+                            <button onclick="changerPeriodeGraph('mois')" id="filter-graph-mois">Ce mois</button>
+                            <button onclick="changerPeriodeGraph('annee')" id="filter-graph-annee">Cette année</button>
+                            <button onclick="changerPeriodeGraph('total')" id="filter-graph-total">Total</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <div id="modal-carnet" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 650px; max-height: 85vh; display: flex; flex-direction: column;">
+            <span class="close-modal" onclick="fermerModalCarnet()">&times;</span>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px; padding-right: 40px; flex-wrap: wrap; gap: 12px;">
+                <h3 id="titre-modal-carnet" style="margin: 0; color: var(--text-primary); font-size: 1.25em;">Mon Carnet</h3>
+                
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; position: absolute; left: 10px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="search-carnet" placeholder="Rechercher..." oninput="rechercherCarnet(this.value)" style="padding-left: 32px; height: 32px; width: 150px; margin: 0;">
+                    </div>
+
+                    <button id="btn-filter-fav-carnet" class="btn-action btn-ghost-neutral btn-square" onclick="toggleFilterFav('carnet')" title="Afficher uniquement les favoris">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin: 0;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    </button>
+
+                    <div class="dropdown" id="dd-filter-carnet" style="display: none;">
+                        <button onclick="toggleDropdown('dd-filter-carnet', event)" class="btn-action btn-ghost-neutral" style="height: 32px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <span id="label-filter-carnet">Toutes les sous-catégories</span>
+                        </button>
+                        <div class="dropdown-content" id="content-filter-carnet" style="right: auto; left: 0;"></div>
+                    </div>
+                    
+                    <div class="dropdown" id="dd-carnet">
+                        <button onclick="toggleDropdown('dd-carnet', event)" class="btn-action btn-ghost-neutral" style="height: 32px; padding: 0 10px; font-size: 13px;">
+                            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 6px;"><line x1="4" x2="20" y1="6" y2="6"/><line x1="14" x2="20" y1="12" y2="12"/><line x1="8" x2="20" y1="18" y2="18"/></svg> Tri
+                        </button>
+                        <div class="dropdown-content">
+                            <button onclick="setSort('carnet', 'prat_asc')" id="sort-carnet-prat_asc" class="active">Moins pratiqués d'abord</button>
+                            <button onclick="setSort('carnet', 'prat_desc')" id="sort-carnet-prat_desc">Plus pratiqués d'abord</button>
+                            <button onclick="setSort('carnet', 'nom_asc')" id="sort-carnet-nom_asc">Nom (A-Z)</button>
+                            <button onclick="setSort('carnet', 'nom_desc')" id="sort-carnet-nom_desc">Nom (Z-A)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="contenu-modal-carnet" style="overflow-y: auto; flex: 1; padding-right: 8px;">
+                <!-- Rempli en JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE GESTION DES ROUTINES -->
+    <div id="modal-routines" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px; max-height: 85vh; display: flex; flex-direction: column;">
+            <span class="close-modal" onclick="fermerModalRoutines()">&times;</span>
+            <h3 style="margin-top: 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px;">Mes routines</h3>
+            <div id="liste-routines-container" style="overflow-y: auto; flex: 1; padding-right: 8px;">
+                <!-- Rempli en JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE SAUVEGARDE ROUTINE -->
+    <div id="modal-save-routine" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-modal" onclick="fermerModalSaveRoutine()">&times;</span>
+            <h3 id="titre-modal-save-routine" style="margin-top: 0; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 20px;">Créer une routine</h3>
+            <div class="form-row">
+                <div style="flex:1;">
+                    <label>Nom de la routine</label>
+                    <input type="text" id="input-routine-nom" placeholder="Ex : Échauffement Rapide" required>
+                </div>
+            </div>
+            <div class="action-container">
+                <button class="btn-action btn-ghost-green" id="btn-valider-routine" onclick="sauvegarderRoutineEnBase()">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-right: 8px;"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                    Enregistrer la routine
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-image-fullscreen" class="modal" style="display: none; z-index: 2000;">
+        <span class="close-modal" style="color: white; font-size: 36px; right: 24px; top: 16px;" onclick="fermerModalImage()">&times;</span>
+        <img id="image-fullscreen-src" src="" style="max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8);">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
